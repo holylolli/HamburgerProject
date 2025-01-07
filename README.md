@@ -1,0 +1,2 @@
+.NET CORE MVC ile Hamburger Sitesi projesi yapılandırma. Bu projede Identity kullanılarak user girişinin de bulunduğu çok katmanlı mimari olmadan EF aracılığı ile bir web sitesi yapmaktır. Bu sitede user giriş ve kayıt ol identity ile olacak şekilde yapılır.
+Menu,Order ve Extra'ların bulunduğu sınıflar kullanılarak her biri için ayrı controller oluşturduktan sonra boostrap ile view'ler oluşturuldu. Menü ekleme bölümüne sadece Admin rolü atanmış kişiler girebilirken Extra ve Order sayfasına ise rolü sadece müşteri olanlar girebilecektir.
