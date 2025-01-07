@@ -1,0 +1,55 @@
+﻿@model HamburgerProject.Models.Menu
+
+@{
+    ViewData["Title"] = "Create Menu";
+}
+
+<div class="container mt-5">
+    <h2 class="text-center">Create a new Menu</h2>
+    <p class="text-muted text-center mb-4">Fill out the form below to add a new menu.</p>
+
+    <form asp-controller="Menu" asp-action="CreateMenu" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+        <!--Asp action Create -->
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <!-- Menu Name -->
+                <div class="mb-3">
+                    <label for="Name" class="form-label">Menu Name</label>
+                    <input asp-for="Name" type="text" class="form-control" id="Name" placeholder="Enter menu name" required>
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+
+                <!-- Price -->
+                <div class="mb-3">
+                    <label for="Price" class="form-label">Price</label>
+                    <input asp-for="Price" type="number" class="form-control" id="Price" placeholder="Enter price" step="0.01" required>
+                    <span asp-validation-for="Price" class="text-danger"></span>
+                </div>
+
+                <!-- Description -->
+                <div class="mb-3">
+                    <label for="Description" class="form-label">Description</label>
+                    <textarea asp-for="Description" class="form-control" id="Description" rows="4" placeholder="Enter menu description" required></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+
+                <!-- Photo Upload -->
+                <div class="mb-3">
+                    <label for="Photo" class="form-label">Upload Photo</label>
+                    <input asp-for="Photo" type="file" class="form-control" id="Photo" accept="image/*">
+                    <span asp-validation-for="Photo" class="text-danger"></span>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary">Add Menu</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Optional: Client-Side Validation -->
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

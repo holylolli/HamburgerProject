@@ -1,0 +1,48 @@
+﻿@model HamburgerProject.Models.Menu
+
+@{
+    ViewData["Title"] = "Edit Menu";
+}
+
+<div class="container mt-5">
+    <h2>Edit Menu</h2>
+    <form asp-action="EditMenu" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+        <input type="hidden" asp-for="Id" />
+
+        <div class="mb-3">
+            <label for="Name" class="form-label">Menu Name</label>
+            <input asp-for="Name" class="form-control" id="Name" placeholder="Enter menu name" required>
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label for="Price" class="form-label">Price</label>
+            <input asp-for="Price" type="number" class="form-control" id="Price" step="0.01" required>
+            <span asp-validation-for="Price" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label for="Description" class="form-label">Description</label>
+            <textarea asp-for="Description" class="form-control" id="Description" rows="3" placeholder="Enter description" required></textarea>
+            <span asp-validation-for="Description" class="text-danger"></span>
+        </div>
+
+        <!-- Eski resmi göstermek için -->
+        @if (!string.IsNullOrEmpty(Model.ImagePath))
+        {
+            <div class="mb-3">
+                <label for="CurrentImage" class="form-label">Current Image</label>
+                <img src="@Model.ImagePath" class="img-thumbnail" width="200" alt="Current Image" />
+            </div>
+        }
+
+        <!-- Yeni resim yükleme alanı -->
+        <div class="mb-3">
+            <label for="ImagePath" class="form-label">Menu Image</label>
+            <input type="file" class="form-control" id="ImagePath" name="photo">
+        </div>
+
+        <button type="submit" class="btn btn-primary">Update Menu</button>
+        <a href="@Url.Action("Index", "Menu")" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
