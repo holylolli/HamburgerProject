@@ -1,0 +1,29 @@
+﻿@model ICollection<HamburgerProject.Models.Menu>
+
+<h2>Menu List</h2>
+
+<table class="table">
+    <thead>
+        <tr>            
+            <th>Name</th>
+            <th>Price</th>
+            <th>Description</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var menu in Model)
+        {
+            <tr>                
+                <td>@menu.Name</td>
+                <td>@menu.Price.ToString("C")</td>
+                <td>@menu.Description</td>
+                <td>
+                    <a asp-controller="Menu" asp-action="Details" asp-route-id="@menu.Id" class="btn btn-info">Details</a>
+                    <a asp-controller="Menu" asp-action="EditMenu" asp-route-id="@menu.Id" class="btn btn-warning">Edit</a>
+                    <a asp-controller="Menu" asp-action="DeleteMenu" asp-route-id="@menu.Id" class="btn btn-danger">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

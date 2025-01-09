@@ -13,13 +13,12 @@ namespace HamburgerProject.Controllers
 
         public MenuController(HamburgerProjectContext db)
         {
-            _db = db;
+            _db = db ?? throw new ArgumentNullException(nameof(db));
         }
-
-       
-        public IActionResult Index()
+        [HttpGet]
+        public async Task<IActionResult> Index()
         {
-            var menuList = _db.Menus.ToListAsync();
+            var menuList = await _db.Menus.AsNoTracking().ToListAsync(); //Task yapmak zorunludur çünkü post metodu da task!
             return View(menuList);
         }
         [HttpGet]
@@ -30,42 +29,51 @@ namespace HamburgerProject.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateMenu(Menu model)
         {
+            ModelState.Remove("Orders");
+
+            if (ModelState.IsValid)
             {
-                if (ModelState.IsValid)
+                if (model.Photo != null && model.Photo.Length > 0)
                 {
-                    string? photoUrl = null;
+                    var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
+                    var extension = Path.GetExtension(model.Photo.FileName).ToLower();
 
-                    // Fotoğraf var mı kontrolü
-                    if (model.Photo != null)
+                    if (!allowedExtensions.Contains(extension))
                     {
-                        // Dosya yolunu oluşturuyoruz (wwwroot dizinine kaydedilecek dosya yolu)
-                        var filePath = Path.Combine("wwwroot/images", model.Photo.FileName);
-
-                        // Fotoğrafı kaydediyoruz
-                        using (var stream = new FileStream(filePath, FileMode.Create))
-                        {
-                            await model.Photo.CopyToAsync(stream);  // Dosyayı kopyalıyoruz
-                        }
-
-                        // Fotoğrafın yolunu model.ImagePath'a atıyoruz
-                        photoUrl = $"/images/{model.Photo.FileName}";
-                        model.ImagePath = photoUrl;  // Fotoğraf yolunu modele ekliyoruz
+                        ModelState.AddModelError("Photo", "Only image files (.jpg, .jpeg, .png, .gif) are allowed.");
+                        return View(model);
                     }
 
-                    // Modeli veri tabanına kaydediyoruz
+                    if (model.Photo.Length > 2 * 1024 * 1024) // 2 MB sınırı
+                    {
+                        ModelState.AddModelError("Photo", "File size cannot exceed 2 MB.");
+                        return View(model);
+                    }
+
+                    var filePath = Path.Combine("wwwroot/images", model.Photo.FileName);
+
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await model.Photo.CopyToAsync(stream);
+                    }
+                    model.ImagePath = $"~/images/{model.Photo.FileName}";
                     await _db.Menus.AddAsync(model);
                     await _db.SaveChangesAsync();
 
-                    return RedirectToAction("Index");
-                }
+                    return RedirectToAction("Index", "Menu");
+                }             
+         
 
-                return View(model);
             }
+
+            return View(model);
+
+
         }
         [HttpGet]
         public async Task<IActionResult> EditMenu(int id)
         {
-            var edit = _db.Menus.FindAsync(id);
+            var edit = await _db.Menus.FindAsync(id);
 
             if (edit == null)
             {
@@ -77,13 +85,13 @@ namespace HamburgerProject.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> EditMenu(int id,Menu model,IFormFile photo)
+        public async Task<IActionResult> EditMenu(int id,Menu model)
         {
 
-            if (!ModelState.IsValid)
-            {
-                return View(model);
-            }
+            //if (!ModelState.IsValid)
+            //{
+            //    return View(model);
+            //}
 
             var editedMenu = await _db.Menus.FindAsync(id);
 
@@ -93,57 +101,47 @@ namespace HamburgerProject.Controllers
             }
 
             // Eğer yeni bir fotoğraf yüklendiyse, önceki fotoğrafı silip yenisini kaydediyoruz
-            if (photo != null && photo.Length > 0)
+            if (model.Photo != null && !string.IsNullOrEmpty(model.Photo.FileName))
             {
                 // Mevcut resmin fiziksel dosyasını silmek isterseniz, önceki resmi kaldırabilirsiniz.
-                if (!string.IsNullOrEmpty(editedMenu.ImagePath))
-                {
-                    var oldImagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", editedMenu.ImagePath.TrimStart('/'));
-                    if (System.IO.File.Exists(oldImagePath))
+   
+                    var filePath = Path.Combine("wwwroot/images", model.Photo.FileName);
+                    using (var stream = new FileStream(filePath, FileMode.Create))
                     {
-                        System.IO.File.Delete(oldImagePath); // Eski resmi sil
+                        await model.Photo.CopyToAsync(stream);
                     }
-                }
+                editedMenu.ImagePath = $"~/images/{model.Photo.FileName}";
 
-                // Yeni resmi kaydet
-                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(photo.FileName);
-                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", fileName);
-
-                // Yeni resmi kaydetme işlemi
-                using (var stream = new FileStream(filePath, FileMode.Create))
+                if (!string.IsNullOrEmpty(model.Name))
                 {
-                    await photo.CopyToAsync(stream);
+                     editedMenu.Name = model.Name;
                 }
-
-                // Yeni resim yolu modelde güncelleniyor
-                editedMenu.ImagePath = "/images/" + fileName;
+                if (editedMenu.Price > 0)
+                {
+                    editedMenu.Price = model.Price;
+                }
+                if (!string.IsNullOrEmpty(model.Name))
+                {
+                    editedMenu.Description = model.Description;
+                }
             }
-
-            // Menü bilgilerini güncelleme
-            editedMenu.Name = model.Name;
-            editedMenu.Description = model.Description;
-            editedMenu.Price = model.Price;
-
-            // Menü veritabanında güncelleniyor
             _db.Menus.Update(editedMenu);
             await _db.SaveChangesAsync();
 
-            return RedirectToAction("Index");
-
-
+            return RedirectToAction("Index","Menu");
         }
+
         [HttpGet]
         public async Task<IActionResult> DeleteMenu(int id)
         {
-            var deleted = _db.Menus.FindAsync(id);
+            var deleted = await _db.Menus.FindAsync(id);
 
             if (deleted == null)
             {
                 return NotFound();
+                
             }
-
             return View(deleted);
-
         }
 
 
@@ -151,18 +149,17 @@ namespace HamburgerProject.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteMenuConfirmed(int id)
         {
-
-            var deletedItem = await _db.Menus.FindAsync(id);
+            var deletedItem =await  _db.Menus.FindAsync(id);
 
             if (deletedItem == null)
             {
                 return NotFound();                
             }
-            
+
             _db.Menus.Remove(deletedItem);
             await _db.SaveChangesAsync();
 
-            return RedirectToAction("Index");
+            return RedirectToAction("Index","Menu");
 
         }
     }

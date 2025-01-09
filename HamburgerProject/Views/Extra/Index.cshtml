@@ -1,0 +1,26 @@
+﻿@model ICollection<HamburgerProject.Models.Extra>
+
+<h2>Menu List</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Price</th>          
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var extra in Model)
+        {
+            <tr>
+                <td>@extra.Name</td>
+                <td>@extra.Price.ToString("C")</td>                
+                <td>
+                    <a asp-controller="Extra" asp-action="EditExtra" asp-route-id="@extra.Id" class="btn btn-primary">Edit</a>
+                    <a asp-controller="Extra" asp-action="DeleteExtra" asp-route-id="@extra.Id" class="btn btn-danger">Delete</a>
+                    <a asp-controller="Home" asp-action="Index" class="btn btn-primary">Go Home!</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

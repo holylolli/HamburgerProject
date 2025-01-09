@@ -13,7 +13,7 @@ namespace HamburgerProject
 
             var builder = WebApplication.CreateBuilder(args);
 
-            var connectionString = builder.Configuration.GetConnectionString("HamburgerProjectContextConnection") ?? throw new InvalidOperationException("Connection string 'HamburgerProjectContextConnection' not found.");             
+            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");             
 
             builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true).AddRoles<IdentityRole>().AddEntityFrameworkStores<HamburgerProjectContext>();
             builder.Services.AddControllersWithViews();
@@ -22,9 +22,9 @@ namespace HamburgerProject
             //    .AddEntityFrameworkStores<HamburgerProjectContext>()
             //    .AddDefaultTokenProviders();
 
-            builder.Services.AddDbContext<HamburgerProjectContext>(options => options.UseSqlServer("HamburgerProjectContextConnection"));
+           // builder.Services.AddDbContext<HamburgerProjectContext>(options => options.UseSqlServer("DefaultConnection"));
            
-            // builder.Services.AddDbContext<AppDbContext>(x => x.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+            builder.Services.AddDbContext<HamburgerProjectContext>(x => x.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))); //Burada üstteki ile otomatik oluþan bir hata alýndýðý için bu kod tekrardan aktif edildi.
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();

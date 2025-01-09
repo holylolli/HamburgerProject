@@ -14,12 +14,12 @@ namespace HamburgerProject.Controllers
 
         public ExtraController(HamburgerProjectContext db)
         {
-            _db = db;
+            _db = db ?? throw new ArgumentNullException(nameof(db));
         }
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var getAll = await _db.Extras.ToListAsync();
+            var getAll = await _db.Extras.AsNoTracking().ToListAsync();
             return View(getAll);
         }
         [HttpGet]
@@ -30,11 +30,13 @@ namespace HamburgerProject.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateExtra(Extra model)
         {
+            ModelState.Remove("OrderExtras");
+
             if (ModelState.IsValid)
             {
                await _db.Extras.AddAsync(model);
                await _db.SaveChangesAsync();
-                return RedirectToAction("Index");
+               return RedirectToAction("Index","Extra");
             }
             return View(model);
             
@@ -42,34 +44,42 @@ namespace HamburgerProject.Controllers
         [HttpGet]
         public async Task<IActionResult> EditExtra(int id)
         {
-            var editedExtra = await _db.Extras.FirstOrDefaultAsync(x => x.Id == id);
+            
+            var editedExtra = await _db.Extras.FindAsync(id);
 
-            if (editedExtra != null)
+            if (editedExtra == null)
             {
                 return NotFound();    
             }
             return View(editedExtra);
         }
         [HttpPost]
+       
         public async Task<IActionResult> EditExtra(int id,Extra model)
         {
-            var editedExtra = await _db.Extras.FindAsync(id);
+            ModelState.Remove("OrderExtras");
+            var  editedExtra = await _db.Extras.FindAsync(id);
 
             if (editedExtra == null)
             {
                 return NotFound();
             }
+
+            if (!string.IsNullOrEmpty(model.Name))
+            {
+                editedExtra.Name = model.Name;
+            }
+            if (editedExtra.Price > 0)
+            {
+                editedExtra.Price = model.Price;
+            }
             if (ModelState.IsValid)
             {
-
-                editedExtra.Name = model.Name;
-                editedExtra.Price = model.Price;
                 _db.Extras.Update(editedExtra);
                 await _db.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-
+                return RedirectToAction("Index", "Extra");
             }
-              return View(model);
+            return View(model);
         }
         [HttpGet]
         public async Task<IActionResult> DeleteExtra(int id)
@@ -83,17 +93,21 @@ namespace HamburgerProject.Controllers
             return View(deletedItem);
         }
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteExtraConfirmed(int id)
-        {
-
+        {           
             var deletedExtra = await _db.Extras.FindAsync(id);
 
-            if (deletedExtra != null)
+            if (deletedExtra == null)
             {
-                _db.Extras.Remove(deletedExtra);
-                await _db.SaveChangesAsync();
+                return NotFound();
+
             }
-            return RedirectToAction(nameof(Index));
+
+            _db.Extras.Remove(deletedExtra);
+            await _db.SaveChangesAsync();
+
+            return RedirectToAction("Index","Extra");
         }
        
     }

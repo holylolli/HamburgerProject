@@ -19,7 +19,7 @@ public class HamburgerProjectContext : IdentityDbContext<ApplicationUser>
     {
 
     }
-
+    //Fluent api'de foreign keyler fazla tanımlandığı için bir düzeltilme yapıldı. TotalPrice ve Price hata verdiği için HasColumnType Eklendi. Migrationslar birkaç defa sıfırlanarak tekrar denendi.
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
@@ -45,52 +45,51 @@ public class HamburgerProjectContext : IdentityDbContext<ApplicationUser>
             entity.HasKey(o => o.Id);
             entity.Property(o => o.OrderDate).IsRequired();
             entity.Property(o => o.Quantity).IsRequired();
-            entity.Property(o => o.TotalPrice).IsRequired().HasColumnType("decimal(18,2)");
 
-            // ApplicationUser ile ilişkiyi kuruyoruz
+            entity.Property(o => o.TotalPrice)
+                  .IsRequired()
+                  .HasColumnType("decimal(18,2)"); // veya HasPrecision(18, 2)
+
+            // ApplicationUser ile ilişki
             entity.HasOne(o => o.ApplicationUser)
                   .WithMany()
                   .HasForeignKey(o => o.ApplicationUserId)
                   .OnDelete(DeleteBehavior.Restrict);
 
-            // Menu ile ilişkiyi kuruyoruz
+            // Menu ile ilişki
             entity.HasOne(o => o.Menu)
                   .WithMany(m => m.Orders)
                   .HasForeignKey(o => o.MenuId)
                   .OnDelete(DeleteBehavior.Restrict);
 
-            // OrderExtra ile ilişkiyi kuruyoruz
+            // OrderExtras ile ilişki
             entity.HasMany(o => o.OrderExtras)
                   .WithOne(oe => oe.Order)
-                  .HasForeignKey(oe => oe.OrderId) // OrderId foreign key olarak kullanılıyor
+                  .HasForeignKey(oe => oe.OrderId)
                   .OnDelete(DeleteBehavior.Cascade);
-
         });
 
         builder.Entity<Extra>(entity =>
         {
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Name).IsRequired().HasMaxLength(50);
-            entity.Property(e => e.Price).IsRequired().HasColumnType("decimal(18,2)");
+            entity.Property(e => e.Price)
+                  .IsRequired()
+                  .HasPrecision(18, 2); // 18 basamaklı, 2 ondalık kısmı olan bir decimal türü
         });
 
 
         builder.Entity<OrderExtra>(entity =>
         {
-            // Composite primary key tanımlaması
-            entity.HasKey(oe => new { oe.OrderId, oe.ExtraId });
+            entity.HasKey(oe => new { oe.OrderId, oe.ExtraId }); // Composite Key
 
-            entity.Property(oe => oe.Quantity).IsRequired();
-
-            // Order ile ilişkiyi kuruyoruz
             entity.HasOne(oe => oe.Order)
                   .WithMany(o => o.OrderExtras)
                   .HasForeignKey(oe => oe.OrderId)
                   .OnDelete(DeleteBehavior.Cascade);
 
-            // Extra ile ilişkiyi kuruyoruz
             entity.HasOne(oe => oe.Extra)
-                  .WithMany()
+                  .WithMany(e => e.OrderExtras)
                   .HasForeignKey(oe => oe.ExtraId)
                   .OnDelete(DeleteBehavior.Restrict);
         });

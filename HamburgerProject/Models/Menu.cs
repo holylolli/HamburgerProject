@@ -14,7 +14,6 @@ namespace HamburgerProject.Models
         [Required]
         [MaxLength(500)]
         public string Description { get; set; }
-        [MaxLength(250)]
         [NotMapped]
         public IFormFile Photo { get; set; }
 

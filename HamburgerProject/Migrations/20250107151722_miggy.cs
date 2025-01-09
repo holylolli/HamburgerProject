@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace HamburgerProject.Migrations
 {
     /// <inheritdoc />
-    public partial class OrderIdShadowError : Migration
+    public partial class miggy : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -60,7 +60,7 @@ namespace HamburgerProject.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
+                    Price = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -224,8 +224,7 @@ namespace HamburgerProject.Migrations
                 {
                     OrderId = table.Column<int>(type: "int", nullable: false),
                     ExtraId = table.Column<int>(type: "int", nullable: false),
-                    Quantity = table.Column<int>(type: "int", nullable: false),
-                    ExtraId1 = table.Column<int>(type: "int", nullable: true)
+                    Quantity = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -236,11 +235,6 @@ namespace HamburgerProject.Migrations
                         principalTable: "Extras",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_OrderExtras_Extras_ExtraId1",
-                        column: x => x.ExtraId1,
-                        principalTable: "Extras",
-                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_OrderExtras_Orders_OrderId",
                         column: x => x.OrderId,
@@ -292,11 +286,6 @@ namespace HamburgerProject.Migrations
                 name: "IX_OrderExtras_ExtraId",
                 table: "OrderExtras",
                 column: "ExtraId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_OrderExtras_ExtraId1",
-                table: "OrderExtras",
-                column: "ExtraId1");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Orders_ApplicationUserId",

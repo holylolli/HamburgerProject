@@ -14,12 +14,13 @@ namespace HamburgerProject.Controllers
         public HomeController(ILogger<HomeController> logger,HamburgerProjectContext db)
         {
             _logger = logger;
-            _db = db;
+            _db = db ?? throw new ArgumentNullException(nameof(db));
         }
 
         public async Task<IActionResult> Index()
-        {             
-            return View();
+        {   
+            var menus = await _db.Menus.AsNoTracking().ToListAsync();
+            return View(menus);
         }
 
         public IActionResult Privacy()

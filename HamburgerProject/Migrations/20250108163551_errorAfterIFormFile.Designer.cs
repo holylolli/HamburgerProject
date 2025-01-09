@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HamburgerProject.Migrations
 {
     [DbContext(typeof(HamburgerProjectContext))]
-    [Migration("20250107094654_OrderIdShadowError")]
-    partial class OrderIdShadowError
+    [Migration("20250108163551_errorAfterIFormFile")]
+    partial class errorAfterIFormFile
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -115,6 +115,7 @@ namespace HamburgerProject.Migrations
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<decimal>("Price")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
@@ -193,17 +194,12 @@ namespace HamburgerProject.Migrations
                     b.Property<int>("ExtraId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("ExtraId1")
-                        .HasColumnType("int");
-
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
                     b.HasKey("OrderId", "ExtraId");
 
                     b.HasIndex("ExtraId");
-
-                    b.HasIndex("ExtraId1");
 
                     b.ToTable("OrderExtras");
                 });
@@ -367,14 +363,10 @@ namespace HamburgerProject.Migrations
             modelBuilder.Entity("HamburgerProject.Models.OrderExtra", b =>
                 {
                     b.HasOne("HamburgerProject.Models.Extra", "Extra")
-                        .WithMany()
+                        .WithMany("OrderExtras")
                         .HasForeignKey("ExtraId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.HasOne("HamburgerProject.Models.Extra", null)
-                        .WithMany("OrderExtras")
-                        .HasForeignKey("ExtraId1");
 
                     b.HasOne("HamburgerProject.Models.Order", "Order")
                         .WithMany("OrderExtras")

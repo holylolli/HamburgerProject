@@ -14,12 +14,11 @@ namespace HamburgerProject.Controllers
     public class OrderController : Controller
     {
         private readonly HamburgerProjectContext _db;
-        private readonly UserManager<ApplicationUser> _userManager;
+       
 
-        public OrderController(HamburgerProjectContext db,UserManager<ApplicationUser> userManager)
+        public OrderController(HamburgerProjectContext db)
         {
-            _db = db;
-            _userManager = userManager;
+            _db = db ?? throw new ArgumentNullException(nameof(db));
         }
 
        
@@ -32,7 +31,7 @@ namespace HamburgerProject.Controllers
         [HttpGet]
         public IActionResult CreateOrder()
         {
-            ViewBag.Menus = _db.Menus.ToList();
+            ViewBag.Menus = _db.Menus.AsNoTracking().ToList();
             return View();
         }
 
@@ -43,8 +42,8 @@ namespace HamburgerProject.Controllers
         {
             if (!ModelState.IsValid)
             {
-                ViewBag.Menus = _db.Menus.ToList();
-                ViewBag.OrderExtras = _db.OrderExtras.ToList();
+                ViewBag.Menus = _db.Menus.AsNoTracking().ToList();
+                ViewBag.OrderExtras = _db.OrderExtras.AsNoTracking().ToList();
                 return View(model);
             }
 
@@ -52,11 +51,13 @@ namespace HamburgerProject.Controllers
 
             if (menu == null)
             {
+
                 ModelState.AddModelError("", "Selected Menu Does not exist!");
                 ViewBag.OrderExtras = _db.OrderExtras.ToList();
                 ViewBag.Menus = _db.Menus.ToList();
                 return View(model);
             }
+
             decimal totalPrice;
 
             model.OrderDate = DateTime.Now;
@@ -76,6 +77,7 @@ namespace HamburgerProject.Controllers
                         OrderId = model.Id,                        
 
                     });
+
                     totalPrice += extra.Price + model.Quantity;
                 }
             }
@@ -108,8 +110,8 @@ namespace HamburgerProject.Controllers
                 return RedirectToAction("Index");
             }
 
-            ViewBag.Menus = await _db.Menus.ToListAsync();
-            ViewBag.Orders = await _db.Orders.ToListAsync();
+            ViewBag.Menus = await _db.Menus.AsNoTracking().ToListAsync();
+            ViewBag.Orders = await _db.Orders.AsNoTracking().ToListAsync();
 
             return View(order);
 

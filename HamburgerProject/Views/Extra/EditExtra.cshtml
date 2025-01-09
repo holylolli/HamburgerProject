@@ -1,24 +1,22 @@
 ﻿@model HamburgerProject.Models.Extra
-@{
-    ViewData["Title"] = "Edit Extra";
-}
 
-<div class="container mt-4">
+<div class="container mt-5">
     <h1>Edit Extra</h1>
-    <form asp-controller="Extra" asp-action="Edit" method="post">
+    <form asp-action="EditExtra" asp-route-id="@Model.Id" method="post" enctype="multipart/form-data">
+        <input type="hidden" asp-for="Id" />
         <div class="mb-3">
             <label for="Name" class="form-label">Name</label>
-            <input asp-for="Name" class="form-control" required />
+            <input asp-for="Name" class="form-control" id="Name" placeholder="Edit Name" required />
             <span asp-validation-for="Name" class="text-danger"></span>
         </div>
 
         <div class="mb-3">
             <label for="Price" class="form-label">Price</label>
-            <input asp-for="Price" class="form-control" required />
+            <input asp-for="Price" class="form-control" id="Price" step="0.01" placeholder="Edit Price" required />
             <span asp-validation-for="Price" class="text-danger"></span>
         </div>
 
-        <button type="submit" class="btn btn-primary">Update</button>
-        <a href="@Url.Action("Index")" class="btn btn-secondary">Back to List</a>
+        <button type="submit" class="btn btn-primary">Update Extra</button>
+        <a href="@Url.Action("Index","Extra")" class="btn btn-secondary">Back to List</a>
     </form>
 </div>
